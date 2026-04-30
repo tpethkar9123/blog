@@ -9,6 +9,8 @@ export async function fetchAPI(path) {
   // Add /api prefix if missing
   const apiPath = path.startsWith("/api") ? path : `/api${path}`
   const requestUrl = getStrapiURL(apiPath)
+  console.log(`FETCHING: ${requestUrl}`)
+
   const response = await fetch(requestUrl)
   
   if (!response.ok) {

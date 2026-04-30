@@ -30,7 +30,26 @@ const Article = ({ article, categories }) => {
       </div>
       <div className="uk-section">
         <div className="uk-container uk-container-small">
-          <ReactMarkdown children={article.content} />
+          
+          {/* Render Blocks */}
+          {article.blocks && article.blocks.map((block, index) => {
+            if (block.__component === "shared.rich-text") {
+              return <ReactMarkdown key={index} children={block.body} />;
+            }
+            if (block.__component === "shared.media") {
+              return <NextImage key={index} image={block.file} />;
+            }
+            if (block.__component === "shared.quote") {
+              return (
+                <blockquote key={index}>
+                  <p>{block.body}</p>
+                  <footer className="uk-text-meta">{block.title}</footer>
+                </blockquote>
+              );
+            }
+            return null;
+          })}
+
           <hr className="uk-divider-small" />
           <div className="uk-grid-small uk-flex-left" data-uk-grid="true">
             <div>
@@ -69,7 +88,7 @@ export async function getStaticPaths() {
 
 
 export async function getStaticProps({ params }) {
-  const articles = await fetchAPI(`/articles?filters[slug][$eq]=${params.slug}&populate=*`)
+  const articles = await fetchAPI(`/articles?filters[slug]=${params.slug}&populate=*`)
   const categories = await fetchAPI("/categories?populate=*")
 
   return {

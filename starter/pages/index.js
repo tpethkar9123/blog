@@ -23,15 +23,14 @@ export async function getStaticProps() {
   const [articles, categories, homepage] = await Promise.all([
     fetchAPI("/articles?populate=*"),
     fetchAPI("/categories?populate=*"),
-    fetchAPI("/homepage?populate=*").catch(() => null), // Use null if missing
-
+    fetchAPI("/homepage?populate=*").catch(() => null),
   ])
 
   return {
-    props: { 
-      articles: articles || [], 
-      categories: categories || [], 
-      homepage: homepage || { hero: { title: "Welcome" }, seo: {} } 
+    props: {
+      articles: articles || [],
+      categories: categories || [],
+      homepage: homepage || { hero: { title: "Welcome" }, seo: {} }
     },
     revalidate: 1,
   }
