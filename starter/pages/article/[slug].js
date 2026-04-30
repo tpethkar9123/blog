@@ -7,12 +7,14 @@ import Seo from "../../components/seo"
 import { getStrapiMedia } from "../../lib/media"
 
 const Article = ({ article, categories }) => {
-  const imageUrl = getStrapiMedia(article.image)
+  if (!article) return null;
+
+  const imageUrl = getStrapiMedia(article.cover || article.image)
 
   const seo = {
     metaTitle: article.title,
     metaDescription: article.description,
-    shareImage: article.image,
+    shareImage: article.cover || article.image,
     article: true,
   }
 
@@ -22,28 +24,26 @@ const Article = ({ article, categories }) => {
       <div
         id="banner"
         className="uk-height-medium uk-flex uk-flex-center uk-flex-middle uk-background-cover uk-light uk-padding uk-margin"
-        data-src={imageUrl}
-        data-srcset={imageUrl}
-        data-uk-img
+        style={{ backgroundImage: `url(${imageUrl})`, backgroundPosition: 'center', backgroundSize: 'cover' }}
       >
         <h1>{article.title}</h1>
       </div>
       <div className="uk-section">
         <div className="uk-container uk-container-small">
-          <ReactMarkdown source={article.content} escapeHtml={false} />
+          <ReactMarkdown children={article.content} />
           <hr className="uk-divider-small" />
           <div className="uk-grid-small uk-flex-left" data-uk-grid="true">
             <div>
-              {article.author.picture && (
+              {article.author?.picture && (
                 <NextImage image={article.author.picture} />
               )}
             </div>
             <div className="uk-width-expand">
               <p className="uk-margin-remove-bottom">
-                By {article.author.name}
+                By {article.author?.name || 'Anonymous'}
               </p>
               <p className="uk-text-meta uk-margin-remove-top">
-                <Moment format="MMM Do YYYY">{article.published_at}</Moment>
+                <Moment format="MMM Do YYYY">{article.publishedAt || article.published_at}</Moment>
               </p>
             </div>
           </div>
@@ -53,11 +53,12 @@ const Article = ({ article, categories }) => {
   )
 }
 
+
 export async function getStaticPaths() {
   const articles = await fetchAPI("/articles")
 
   return {
-    paths: articles.map((article) => ({
+    paths: (articles || []).map((article) => ({
       params: {
         slug: article.slug,
       },
@@ -66,14 +67,19 @@ export async function getStaticPaths() {
   }
 }
 
+
 export async function getStaticProps({ params }) {
-  const articles = await fetchAPI(`/articles?slug=${params.slug}`)
-  const categories = await fetchAPI("/categories")
+  const articles = await fetchAPI(`/articles?filters[slug][$eq]=${params.slug}&populate=*`)
+  const categories = await fetchAPI("/categories?populate=*")
 
   return {
-    props: { article: articles[0], categories },
+    props: { 
+      article: articles?.[0] || null, 
+      categories: categories || [] 
+    },
     revalidate: 1,
   }
 }
+
 
 export default Article

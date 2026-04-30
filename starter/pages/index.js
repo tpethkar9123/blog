@@ -19,17 +19,23 @@ const Home = ({ articles, categories, homepage }) => {
 }
 
 export async function getStaticProps() {
-  // Run API calls in parallel
+  // Run API calls in parallel with population
   const [articles, categories, homepage] = await Promise.all([
-    fetchAPI("/articles"),
-    fetchAPI("/categories"),
-    fetchAPI("/homepage"),
+    fetchAPI("/articles?populate=*"),
+    fetchAPI("/categories?populate=*"),
+    fetchAPI("/homepage?populate=*").catch(() => null), // Use null if missing
+
   ])
 
   return {
-    props: { articles, categories, homepage },
+    props: { 
+      articles: articles || [], 
+      categories: categories || [], 
+      homepage: homepage || { hero: { title: "Welcome" }, seo: {} } 
+    },
     revalidate: 1,
   }
 }
+
 
 export default Home

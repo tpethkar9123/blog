@@ -2,7 +2,10 @@ import { getStrapiMedia } from "../lib/media"
 import NextImage from "next/image"
 
 const Image = ({ image, style }) => {
-  const { url, alternativeText } = image
+  if (!image) {
+    return null;
+  }
+  const { url, alternativeText, width, height } = image
 
   const loader = () => {
     return getStrapiMedia(image)
@@ -12,13 +15,14 @@ const Image = ({ image, style }) => {
     <NextImage
       loader={loader}
       layout="responsive"
-      width={image.width}
-      height={image.height}
+      width={width || 100}
+      height={height || 100}
       objectFit="contain"
-      src={url}
+      src={getStrapiMedia(image)}
       alt={alternativeText || ""}
     />
   )
 }
+
 
 export default Image

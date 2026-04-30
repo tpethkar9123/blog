@@ -30,10 +30,12 @@ const MyApp = ({ Component, pageProps }) => {
 MyApp.getInitialProps = async (ctx) => {
   // Calls page's `getInitialProps` and fills `appProps.pageProps`
   const appProps = await App.getInitialProps(ctx)
-  // Fetch global site settings from Strapi
-  const global = await fetchAPI("/global")
+  // Fetch global site settings from Strapi with population
+  const global = await fetchAPI("/global?populate=*")
+
   // Pass the data to our page via props
-  return { ...appProps, pageProps: { global } }
+  return { ...appProps, pageProps: { global: global || {} } }
 }
+
 
 export default MyApp
